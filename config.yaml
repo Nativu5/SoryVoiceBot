@@ -1,0 +1,5 @@
+version: 0.1
+
+hotword: test.paml
+
+log_level: DEBUG

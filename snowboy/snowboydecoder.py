@@ -2,12 +2,12 @@
 
 import collections
 import pyaudio
-import snowboydetect
+from . import snowboydetect
 import time
 import wave
 import os
 import logging
-from ctypes import *
+from ctypes import CFUNCTYPE, c_char_p, c_int, cdll
 from contextlib import contextmanager
 
 logging.basicConfig()

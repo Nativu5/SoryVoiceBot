@@ -1,4 +1,4 @@
-import snowboydecoder
+from . import snowboydecoder
 import sys
 import signal
 import speech_recognition as sr
@@ -31,14 +31,16 @@ def audioRecorderCallback(fname):
     except sr.UnknownValueError:
         print("Google Speech Recognition could not understand audio")
     except sr.RequestError as e:
-        print("Could not request results from Google Speech Recognition service; {0}".format(e))
+        print(
+            "Could not request results from Google Speech Recognition service; {0}".format(e))
 
     os.remove(fname)
 
 
+def detectedCallback(fname: str = ""):
+    snowboydecoder.play_audio_file()
+    print('recording audio...', end='', flush=True)
 
-def detectedCallback():
-  print('recording audio...', end='', flush=True)
 
 def signal_handler(signal, frame):
     global interrupted
@@ -49,27 +51,32 @@ def interrupt_callback():
     global interrupted
     return interrupted
 
-if len(sys.argv) == 1:
-    print("Error: need to specify model name")
-    print("Usage: python demo.py your.model")
-    sys.exit(-1)
 
-model = sys.argv[1]
-
-# capture SIGINT signal, e.g., Ctrl+C
-signal.signal(signal.SIGINT, signal_handler)
-
-detector = snowboydecoder.HotwordDetector(model, sensitivity=0.38)
-print('Listening... Press Ctrl+C to exit')
-
-# main loop
-detector.start(detected_callback=detectedCallback,
-               audio_recorder_callback=audioRecorderCallback,
-               interrupt_check=interrupt_callback,
-               sleep_time=0.01)
-
-detector.terminate()
+def get_detector(model, sensitivity=0.38):
+    return snowboydecoder.HotwordDetector(decoder_model=model, sensitivity=sensitivity)
 
 
+def start_loop(model, sensitivity=0.38, frontend=None, sleep_time=0.01):
+    # capture SIGINT signal, e.g., Ctrl+C
+    signal.signal(signal.SIGINT, signal_handler)
+
+    detector = snowboydecoder.HotwordDetector(decoder_model=model,
+                                              sensitivity=sensitivity)
+    print('Listening... Press Ctrl+C to exit')
+
+    # main loop
+    detector.start(detected_callback=detectedCallback,
+                   audio_recorder_callback=audioRecorderCallback,
+                   interrupt_check=interrupt_callback,
+                   sleep_time=sleep_time)
+
+    detector.terminate()
 
 
+if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        print("Error: need to specify model name")
+        print("Usage: python demo.py your.model")
+        sys.exit(-1)
+
+    start_loop(model=sys.argv[1])

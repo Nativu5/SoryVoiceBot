@@ -1,7 +1,6 @@
 from random import randint
-from re import M
 from time import sleep
-import apa102
+from . import apa102
 from gpiozero import LED as GPIO
 
 # LED 控制模块

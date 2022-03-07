@@ -1,5 +1,5 @@
 version: 0.1
 
-hotword: test.paml
+hotword: snowboy/resources/models/computer.umdl
 
 log_level: DEBUG

@@ -6,6 +6,7 @@ from interface.led import LED
 
 interrupted = False
 
+
 def signal_handler(signal, frame):
     global interrupted
     interrupted = True
@@ -18,22 +19,20 @@ def interrupt_callback():
 
 if __name__ == '__main__':
     config = utils.config.Config("config.yaml")
-    config.read()
+    config.load_all()
 
-    logger = utils.log.init_logging(config.log_level)
-    logger.warning(config)
- 
-    # snowboy.keyword.start_loop(model=config.hotword)
-    detector = snowboy.get_detector(config.hotword)
+    logger = utils.log.init_logging(name=__name__)
+
+    detector = snowboy.get_detector(config.hotword, sensitivity=0.38)
 
     myLED = LED()
 
     bot = Sory(detector=detector, led=myLED, config=config)
 
-    detector.start(detected_callback=bot.detected_callback,
-                   audio_recorder_callback=bot.audioRecorderCallback,
-                   interrupt_check=interrupt_callback,
-                   sleep_time=0.01)
+    bot.detector.start(detected_callback=bot.detected_callback,
+                       audio_recorder_callback=bot.audio_recorder_callback,
+                       interrupt_check=interrupt_callback,
+                       silent_count_threshold=12,
+                       sleep_time=0.01)
 
-    detector.terminate()
-    
+    bot.detector.terminate()

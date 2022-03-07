@@ -28,7 +28,7 @@ if __name__ == '__main__':
 
     myLED = LED()
 
-    bot = Sory(detector=detector, led=myLED)
+    bot = Sory(detector=detector, led=myLED, config=config)
 
     detector.start(detected_callback=bot.detected_callback,
                    audio_recorder_callback=bot.audioRecorderCallback,

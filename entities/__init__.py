@@ -3,9 +3,10 @@ import os
 from interface.led import LED as _LED
 
 class Sory:
-    def __init__(self, detector, led : _LED) -> None:
+    def __init__(self, detector, led : _LED, config) -> None:
         self.detector = detector
         self.LED = led
+        self.config = config
 
     def detected_callback(self, fname: str = ""):
         # snowboydecoder.play_audio_file()
@@ -20,7 +21,7 @@ class Sory:
         with sr.AudioFile(fname) as source:
             audio = r.record(source)
         try:
-            print(r.recognize_bing(audio_data=audio, key="14056afadb5a44c1a15fb1d288e08cdc", language='zh-CN'))
+            print(r.recognize_bing(audio_data=audio, key=self.config.azure_key, language='zh-CN'))
             # print(r.recognize_google(audio, language="zh-yue"))
         except sr.UnknownValueError:
             print("Could not understand audio")

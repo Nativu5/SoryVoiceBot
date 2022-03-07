@@ -32,7 +32,7 @@ def parse_wav_file(fname):
     return raw
 
 
-def recognize(audio_data, key, region, language, format="simple", profanity="masked", model_cid=None, show_all=False):
+def speech_to_text(audio_data, key, region, language, format="simple", profanity="masked", model_cid=None, show_all=False):
     headers = {
         "Content-type": "audio/wav; codecs=audio/pcm; samplerate=16000",
         "Accept": "application/json"
@@ -64,19 +64,69 @@ def recognize(audio_data, key, region, language, format="simple", profanity="mas
         response.encoding = response.apparent_encoding
         r_json = response.json()
     except Exception as e:
-        logger.error("Cannot obtain recognition result: ".format(e))
+        logger.error("Cannot obtain STT result: ".format(e))
         raise e
 
     try:
         text = str(r_json["DisplayText"])
     except:
-        raise Exception("Invalid recognition output: ".format(r_json))
+        raise Exception("Invalid STT output: ".format(r_json))
 
     return r_json if show_all else text
+
+
+from xml.etree import ElementTree
+
+def text_to_speech(text, key, region, fname):
+    headers = {
+        'Content-Type': 'application/ssml+xml',
+        'X-Microsoft-OutputFormat': 'riff-24khz-16bit-mono-pcm',
+        'User-Agent': 'sorybot'
+    }
+    
+    try:
+        access_token = get_token(region, key)
+    except Exception:
+        logger.warning("Change to use subscription_key directly.")
+        headers["Ocp-Apim-Subscription-Key"] = key
+    else:
+        headers["authorization"] = "Bearer {}".format(access_token)
+
+    url = 'https://{}.tts.speech.microsoft.com/cognitiveservices/v1'.format(region)
+
+    xml_body = ElementTree.Element('speak', version='1.0')
+    xml_body.set('{http://www.w3.org/XML/1998/namespace}lang', 'zh-CN')
+    voice = ElementTree.SubElement(xml_body, 'voice')
+    voice.set('{http://www.w3.org/XML/1998/namespace}lang', 'zh-CN')
+    voice.set('name', 'zh-CN-XiaoyanNeural')
+    voice.text = text
+    body = ElementTree.tostring(xml_body)
+
+    try:
+        response = requests.post(url, headers=headers, data=body)
+        response.raise_for_status()
+    except Exception as e:
+        logger.error("Cannot obtain TTS result: ".format(e))
+        raise e
+
+    with open(fname, 'wb') as audio:
+        audio.write(response.content)
+    return response.content
+
+def get_voices_list(access_token, region):
+    url = f'https://{region}.tts.speech.microsoft.com/cognitiveservices/voices/list'
+    headers = {
+        'Authorization': 'Bearer ' + access_token,
+    }
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        print("\nAvailable voices: \n" + response.text)
+    else:
+        print("\nStatus code: " + str(response.status_code) + "\nSomething went wrong. Check your subscription key and headers.\n")
 
 
 if __name__ == "__main__":
     region = "japaneast"
     subscription_key = 'some_key'
     audio_data = parse_wav_file("some.wav")
-    recognize(audio_data, subscription_key, region, "zh-CN")
+    speech_to_text(audio_data, subscription_key, region, "zh-CN")

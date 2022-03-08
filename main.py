@@ -28,7 +28,8 @@ if __name__ == '__main__':
     myLED = LED()
 
     bot = Sory(detector=detector, led=myLED, config=config)
-
+    
+    logger.info("Sory Bot is listening.")
     bot.detector.start(detected_callback=bot.detected_callback,
                        audio_recorder_callback=bot.audio_recorder_callback,
                        interrupt_check=interrupt_callback,

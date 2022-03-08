@@ -16,7 +16,7 @@ def init_logging(name: str) -> logging.Logger:
     log_handler = logging.StreamHandler()
     log_handler.setLevel(level)
     log_handler.setFormatter(logging.Formatter(
-        "[%(levelname)s] %(asctime)s: %(message)s (%(filename)s[:%(lineno)d])"))
+        "[%(levelname)s] %(asctime)s - %(name)s: %(message)s (%(filename)s[:%(lineno)d])"))
 
     logger.addHandler(log_handler)
     return logger

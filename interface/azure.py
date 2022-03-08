@@ -4,7 +4,7 @@ from utils.log import init_logging
 logger = init_logging(__name__)
 
 
-def get_token(region, subscription_key):
+def _get_token(region, subscription_key):
     fetch_token_url = 'https://{}.api.cognitive.microsoft.com/sts/v1.0/issueToken'.format(
         region)
     headers = {
@@ -39,7 +39,7 @@ def speech_to_text(audio_data, key, region, language, format="simple", profanity
     }
 
     try:
-        access_token = get_token(region, key)
+        access_token = _get_token(region, key)
     except Exception:
         logger.warning("Change to use subscription_key directly.")
         headers["Ocp-Apim-Subscription-Key"] = key
@@ -85,7 +85,7 @@ def text_to_speech(text, key, region, fname):
     }
     
     try:
-        access_token = get_token(region, key)
+        access_token = _get_token(region, key)
     except Exception:
         logger.warning("Change to use subscription_key directly.")
         headers["Ocp-Apim-Subscription-Key"] = key
@@ -113,20 +113,22 @@ def text_to_speech(text, key, region, fname):
         audio.write(response.content)
     return response.content
 
-def get_voices_list(access_token, region):
+def _get_voices_list(access_token, region):
     url = f'https://{region}.tts.speech.microsoft.com/cognitiveservices/voices/list'
     headers = {
         'Authorization': 'Bearer ' + access_token,
     }
-    response = requests.get(url, headers=headers)
-    if response.status_code == 200:
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
         print("\nAvailable voices: \n" + response.text)
-    else:
-        print("\nStatus code: " + str(response.status_code) + "\nSomething went wrong. Check your subscription key and headers.\n")
+    except Exception as e:
+        print("Something went wrong: {}".format(e))
 
 
 if __name__ == "__main__":
     region = "japaneast"
     subscription_key = 'some_key'
-    audio_data = parse_wav_file("some.wav")
-    speech_to_text(audio_data, subscription_key, region, "zh-CN")
+    # audio_data = parse_wav_file("some.wav")
+    # speech_to_text(audio_data, subscription_key, region, "zh-CN")
+    text_to_speech("我在！", key=subscription_key, region=region, fname="sample.wav")

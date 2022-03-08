@@ -23,7 +23,7 @@ if __name__ == '__main__':
 
     logger = utils.log.init_logging(name=__name__)
 
-    detector = snowboy.get_detector(config.hotword, sensitivity=0.38)
+    detector = snowboy.get_detector(config.hotword, sensitivity=0.42)
 
     myLED = LED()
 

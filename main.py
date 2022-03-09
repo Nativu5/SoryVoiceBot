@@ -23,12 +23,12 @@ if __name__ == '__main__':
 
     logger = utils.log.init_logging(name=__name__)
 
-    detector = snowboy.get_detector(config.hotword, sensitivity=0.42)
+    detector = snowboy.get_detector(config.hotword, sensitivity=0.5)
 
     myLED = LED()
 
     bot = Sory(detector=detector, led=myLED, config=config)
-    
+
     logger.info("Sory Bot is listening.")
     bot.detector.start(detected_callback=bot.detected_callback,
                        audio_recorder_callback=bot.audio_recorder_callback,

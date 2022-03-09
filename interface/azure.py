@@ -1,3 +1,4 @@
+from xml.etree import ElementTree
 import requests
 from utils.log import init_logging
 
@@ -75,15 +76,13 @@ def speech_to_text(audio_data, key, region, language, format="simple", profanity
     return r_json if show_all else text
 
 
-from xml.etree import ElementTree
-
 def text_to_speech(text, key, region, fname):
     headers = {
         'Content-Type': 'application/ssml+xml',
         'X-Microsoft-OutputFormat': 'riff-24khz-16bit-mono-pcm',
         'User-Agent': 'sorybot'
     }
-    
+
     try:
         access_token = _get_token(region, key)
     except Exception:
@@ -92,7 +91,8 @@ def text_to_speech(text, key, region, fname):
     else:
         headers["authorization"] = "Bearer {}".format(access_token)
 
-    url = 'https://{}.tts.speech.microsoft.com/cognitiveservices/v1'.format(region)
+    url = 'https://{}.tts.speech.microsoft.com/cognitiveservices/v1'.format(
+        region)
 
     xml_body = ElementTree.Element('speak', version='1.0')
     xml_body.set('{http://www.w3.org/XML/1998/namespace}lang', 'zh-CN')
@@ -113,6 +113,7 @@ def text_to_speech(text, key, region, fname):
         audio.write(response.content)
     return response.content
 
+
 def _get_voices_list(access_token, region):
     url = f'https://{region}.tts.speech.microsoft.com/cognitiveservices/voices/list'
     headers = {
@@ -131,4 +132,5 @@ if __name__ == "__main__":
     subscription_key = 'some_key'
     # audio_data = parse_wav_file("some.wav")
     # speech_to_text(audio_data, subscription_key, region, "zh-CN")
-    text_to_speech("我在！", key=subscription_key, region=region, fname="sample.wav")
+    text_to_speech("我在！", key=subscription_key,
+                   region=region, fname="sample.wav")

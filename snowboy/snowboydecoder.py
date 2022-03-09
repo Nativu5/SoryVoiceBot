@@ -19,12 +19,16 @@ RESOURCE_FILE = os.path.join(TOP_DIR, "resources/common.res")
 DETECT_DING = os.path.join(TOP_DIR, "resources/ding.wav")
 DETECT_DONG = os.path.join(TOP_DIR, "resources/dong.wav")
 
+
 def py_error_handler(filename, line, function, err, fmt):
     pass
 
-ERROR_HANDLER_FUNC = CFUNCTYPE(None, c_char_p, c_int, c_char_p, c_int, c_char_p)
+
+ERROR_HANDLER_FUNC = CFUNCTYPE(
+    None, c_char_p, c_int, c_char_p, c_int, c_char_p)
 
 c_error_handler = ERROR_HANDLER_FUNC(py_error_handler)
+
 
 @contextmanager
 def no_alsa_error():
@@ -36,6 +40,7 @@ def no_alsa_error():
     except:
         yield
         pass
+
 
 class RingBuffer(object):
     """Ring buffer to hold audio from PortAudio"""
@@ -203,18 +208,19 @@ class HotwordDetector(object):
 
             status = self.detector.RunDetection(data)
             if status == -1:
-                logger.warning("Error initializing streams or reading audio data")
+                logger.warning(
+                    "Error initializing streams or reading audio data")
 
             #small state machine to handle recording of phrase after keyword
             if state == "PASSIVE":
-                if status > 0: #key word found
+                if status > 0:  # key word found
                     self.recordedData = []
                     self.recordedData.append(data)
                     silentCount = 0
                     recordingCount = 0
                     message = "Keyword " + str(status) + " detected at time: "
                     message += time.strftime("%Y-%m-%d %H:%M:%S",
-                                         time.localtime(time.time()))
+                                             time.localtime(time.time()))
                     logger.info(message)
                     callback = detected_callback[status-1]
                     if callback is not None:
@@ -228,12 +234,12 @@ class HotwordDetector(object):
                 stopRecording = False
                 if recordingCount > recording_timeout:
                     stopRecording = True
-                elif status == -2: #silence found
+                elif status == -2:  # silence found
                     if silentCount > silent_count_threshold:
                         stopRecording = True
                     else:
                         silentCount = silentCount + 1
-                elif status == 0: #voice found
+                elif status == 0:  # voice found
                     silentCount = 0
 
                 if stopRecording == True:

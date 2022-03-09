@@ -26,19 +26,20 @@ class Sory:
         logger.info("Converting audio to text")
         try:
             audio_data = parse_wav_file(fname)
-            stt_text = speech_to_text(audio_data, self.config.azure_key, "japaneast", "zh-CN")
-            logger.info(stt_text)
+            stt_text = speech_to_text(
+                audio_data, self.config.azure_key, "japaneast", "zh-CN")
+            logger.info("User: " + stt_text)
         except Exception as e:
             logger.warning(
                 "Could not request results from STT service; {0}".format(e))
             reply = "语音转文字功能出错啦！"
         else:
-            logger.info("User: " + stt_text)
             reply = get_reply(stt_text)
             logger.info("Bot: " + reply)
 
         try:
-            play_back_data = text_to_speech(reply, self.config.azure_key, "japaneast", "playback_" + fname)
+            play_back_data = text_to_speech(
+                reply, self.config.azure_key, "japaneast", "playback_" + fname)
         except Exception as e:
             logger.warning(
                 "Could not request results from TTS service; {0}".format(e))
@@ -47,5 +48,5 @@ class Sory:
         finally:
             os.remove(fname)
             os.remove("playback_" + fname)
-        
+
         self.LED.power.off()

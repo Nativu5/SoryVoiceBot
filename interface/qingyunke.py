@@ -3,10 +3,11 @@ from utils.log import init_logging
 
 logger = init_logging(__name__)
 
+
 def get_reply(text: str):
     url = "http://api.qingyunke.com/api.php"
     params = {
-        "key" : "free", 
+        "key": "free",
         "appid": 0,
         "msg": text
     }
@@ -21,5 +22,7 @@ def get_reply(text: str):
     except Exception as e:
         logger.warning("Unable to fetch reply: {}".format(e))
         reply = "暂时无法理解你的话哦。"
-    
+
+    reply = reply.replace("{br}", "\n")
+
     return reply

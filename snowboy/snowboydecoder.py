@@ -6,7 +6,6 @@ from . import snowboydetect
 import time
 import wave
 import os
-import logging
 from ctypes import CFUNCTYPE, c_char_p, c_int, cdll
 from contextlib import contextmanager
 
@@ -228,6 +227,7 @@ class HotwordDetector(object):
 
                     if audio_recorder_callback is not None:
                         state = "ACTIVE"
+                        time.sleep(1.6)
                     continue
 
             elif state == "ACTIVE":

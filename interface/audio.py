@@ -41,6 +41,11 @@ class VLCInterface:
         self.player.set_media(media)
         self.player.play()
 
+    def is_playing(self):
+        if self.player.is_playing() == 1:
+            return True
+        return False
+
 
 if __name__ == "__main__":
     vlc_instance = VLCInterface()

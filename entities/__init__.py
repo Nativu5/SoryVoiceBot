@@ -21,14 +21,16 @@ class Sory:
         self.is_playing = False
 
     def detected_callback(self):
-        if self.is_playing:
-            return
+        self.is_playing = self.VLC_instance.is_playing()
+        if self.is_playing == True:
+            return False
         self.VLC_instance.play_audio("audio/wozai.wav")
         self.LED.power.on()
         for i in range(0, 12):
             self.LED.switch_by_place(
                 i, color={"r": 255, "g": 0, "b": 0}, bright=30)
         logger.info('Recording audio...')
+        return True
 
     def audio_recorder_callback(self, fname):
         if self.is_playing:

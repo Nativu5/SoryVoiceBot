@@ -17,13 +17,13 @@ def interrupt_callback():
     return interrupted
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':                                                                                                                                                                                                                                                                                                           
     config = utils.config.Config("config.yaml")
     config.load_all()
 
     logger = utils.log.init_logging(name=__name__)
 
-    detector = snowboy.get_detector(config.hotword, sensitivity=0.5)
+    detector = snowboy.get_detector(config.hotword, sensitivity=0.65)
 
     myLED = LED()
 

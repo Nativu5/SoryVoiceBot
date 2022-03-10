@@ -1,3 +1,4 @@
+import vlc
 import pyaudio
 import wave
 import time
@@ -26,3 +27,21 @@ def play_wav_file(fname):
     stream_out.stop_stream()
     stream_out.close()
     audio.terminate()
+
+
+class VLCInterface:
+    def __init__(self) -> None:
+        self.instance = vlc.Instance('--input-repeat=-1', '--fullscreen')
+        assert isinstance(self.instance, vlc.Instance)
+        self.player = self.instance.media_player_new()
+
+    def play_audio(self, uri):
+        assert isinstance(self.instance, vlc.Instance)
+        media = self.instance.media_new(uri)
+        self.player.set_media(media)
+        self.player.play()
+
+
+if __name__ == "__main__":
+    vlc_instance = VLCInterface()
+    vlc_instance.play_audio("audio/wozai.wav")

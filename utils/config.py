@@ -4,6 +4,7 @@ import os
 
 logger = logging.Logger(__name__)
 
+
 class Config:
     def __init__(self, path) -> None:
         self.filepath = path
@@ -11,7 +12,7 @@ class Config:
         self.version = "0.1"
         self.log_level = "DEBUG"
         self.hotword = ""
-    
+
     def load_all(self):
         if os.path.exists(self.filepath) == False:
             logger.critical("No config file found!")
@@ -23,6 +24,9 @@ class Config:
             self.hotword = yaml_file["hotword"]
             self.azure_key = yaml_file["azure_key"]
             self.log_level = yaml_file["log_level"]
+            self.netease_api_url = yaml_file["netease_api_url"]
+            self.netease_email = yaml_file["netease_email"]
+            self.netease_password_md5 = yaml_file["netease_password_md5"]
         except AttributeError:
             logger.critical("Corrupt config file!")
             exit()

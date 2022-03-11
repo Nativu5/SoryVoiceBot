@@ -24,7 +24,7 @@ class Sory:
         self.is_playing = self.VLC_instance.is_playing()
         if self.is_playing == True:
             return False
-        self.VLC_instance.play_audio("audio/wozai.wav")
+        self.VLC_instance.play_audio("resources/wozai.wav")
         self.LED.power.on()
         for i in range(0, 12):
             self.LED.switch_by_place(
@@ -54,6 +54,7 @@ class Sory:
                 song_list = self.music_provider.search_music(parsed_str[1])
                 if song_list != None and len(song_list) > 0:
                     song_url = self.music_provider.get_song_url(song_list[0])
+                    logger.info("Streaming {}...".format(song_url))
                     self.VLC_instance.play_audio(song_url)
                     self.is_playing = True
 

@@ -14,7 +14,7 @@ from utils.log import init_logging
 logger = init_logging(__name__)
 
 TOP_DIR = os.path.dirname(os.path.abspath(__file__))
-RESOURCE_FILE = os.path.join(TOP_DIR, "resources/common.res")
+RESOURCE_FILE = os.path.join(TOP_DIR, "common.res")
 DETECT_DING = os.path.join(TOP_DIR, "resources/ding.wav")
 DETECT_DONG = os.path.join(TOP_DIR, "resources/dong.wav")
 
@@ -232,7 +232,7 @@ class HotwordDetector(object):
 
                     if audio_recorder_callback is not None:
                         state = "ACTIVE"
-                        time.sleep(2)
+                        time.sleep(2) # omit the response
                     continue
 
             elif state == "ACTIVE":
@@ -249,6 +249,7 @@ class HotwordDetector(object):
 
                 if stopRecording == True:
                     fname = self.saveMessage()
+                    wav_data = self.mergeData()
                     audio_recorder_callback(fname)
                     state = "PASSIVE"
                     continue
@@ -257,6 +258,10 @@ class HotwordDetector(object):
                 self.recordedData.append(data)
 
         logger.debug("finished.")
+
+    def mergeData(self):
+        data = b''.join(self.recordedData)
+        return data
 
     def saveMessage(self):
         """

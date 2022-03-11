@@ -31,15 +31,15 @@ class Config:
             logger.critical("Corrupt config file!")
             exit()
 
-    def get_config_by_name(self, name):
-        if os.path.exists(self.filepath) == False:
-            logger.critical("No config file found!")
-            exit(-1)
-        with open(self.filepath, "r") as f:
-            yaml_file = yaml.safe_load(f)
-        try:
-            ret = yaml_file[name]
-        except AttributeError:
-            logger.critical("No such configuration.")
-            exit(-1)
-        return ret
+def get_config_by_name(filepath, name):
+    if os.path.exists(filepath) == False:
+        logger.critical("No config file found!")
+        exit(-1)
+    with open(filepath, "r") as f:
+        yaml_file = yaml.safe_load(f)
+    try:
+        ret = yaml_file[name]
+    except AttributeError:
+        logger.critical("No such configuration.")
+        exit(-1)
+    return ret

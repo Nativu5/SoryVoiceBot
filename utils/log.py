@@ -8,7 +8,7 @@ from . import config
 
 
 def init_logging(name: str) -> logging.Logger:
-    level = config.Config("config.yaml").get_config_by_name("log_level")
+    level = config.get_config_by_name("config.yaml", "log_level")
 
     logger = logging.getLogger(name)
     logger.setLevel(level)

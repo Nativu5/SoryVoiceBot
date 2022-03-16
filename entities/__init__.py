@@ -1,11 +1,11 @@
 import os
-from interface.azure import parse_wav_file, speech_to_text, text_to_speech
+from interface.azure import parse_wav_file, text_to_speech
 from interface.audio import VLCInterface
-from interface.cloudmusic import CloudMusic
 from interface.led import LED as _LED
 from interface.qingyunke import get_reply
 from utils.log import init_logging
-
+from entities.MusicProvider import CloudMusicProvider, LocalMusicProvider
+from entities.STTProvider import LocalSTTProvider
 logger = init_logging(__name__)
 
 
@@ -15,10 +15,10 @@ class Sory:
         self.config = config
         self.LED = led
         self.VLC_instance = VLCInterface()
-        self.music_provider = CloudMusic(self.config.netease_api_url)
-        self.music_provider.login_by_email(
-            self.config.netease_email, md5_password=self.config.netease_password_md5)
+        self.music_provider = CloudMusicProvider(
+            self.config.netease_api_url, None, self.config.netease_email, None, self.config.netease_password_md5)
         self.is_playing = False
+        self.stt = LocalSTTProvider()
 
     def detected_callback(self):
         self.is_playing = self.VLC_instance.is_playing()
@@ -38,8 +38,8 @@ class Sory:
         logger.info("Converting audio to text")
         try:
             audio_data = parse_wav_file(fname)
-            stt_text = speech_to_text(
-                audio_data, self.config.azure_key, "japaneast", "zh-CN")
+            stt_text = self.stt.speech_to_text(
+                audio_data)
             logger.info("User: " + stt_text)
         except Exception as e:
             logger.warning(
@@ -70,9 +70,5 @@ class Sory:
                 else:
                     self.VLC_instance.play_audio("playback_" + fname)
                     self.is_playing = True
-                finally:
-                    os.remove("playback_" + fname)
-        finally:
-            os.remove(fname)
 
         self.LED.power.off()

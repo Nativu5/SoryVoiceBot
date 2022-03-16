@@ -41,9 +41,9 @@ class CloudMusicProvider(_MusicProvider):
         else:
             logger.warning("Insuffient infomation to login in.")
 
-        nickname = self._get_nickname()
-        if self.is_login == True and nickname != None:
-            logger.info(nickname + " have logged in CloudMusic.")
+        # nickname = self._get_nickname()
+        # if self.is_login == True and nickname != None:
+        #     logger.info(nickname + " have logged in CloudMusic.")
 
     def _login_by_phone(self, phone, password=None, md5_password=None):
         url = self.base_url + "/login/cellphone"
@@ -108,13 +108,18 @@ class CloudMusicProvider(_MusicProvider):
         return True
 
     def _get_nickname(self):
-        url = self.base_url + "/login/status"
+        url = self.base_url + "/user/account"
+
+        headers = {
+            'Cookie': self.cookie
+        }
+
 
         try:
-            resp = requests.get(url)
+            resp = requests.get(url, headers=headers)
             resp.raise_for_status()
             resp_json = resp.json()
-            nickname = resp_json["data"]["profile"]["nickname"]
+            nickname = resp_json["profile"]["nickname"]
         except Exception as e:
             logger.error("Fail to check login status: {}".format(e))
             self.is_login = False
@@ -157,7 +162,7 @@ class CloudMusicProvider(_MusicProvider):
 
         return songlist
 
-    def get_song_uri(self, id, br=320000):
+    def get_song_url(self, id, br=320000):
         if self.is_login == False:
             return None
 

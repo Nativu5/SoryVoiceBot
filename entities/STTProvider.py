@@ -3,6 +3,7 @@ from io import BytesIO
 import requests
 from utils.log import init_logging
 from vosk import Model, KaldiRecognizer
+import json
 
 logger = init_logging(__name__)
 
@@ -11,7 +12,7 @@ class _STTProvider:
     def __init__(self):
         pass
 
-    def to_text(self):
+    def speech_to_text(self):
         return ""
 
 
@@ -19,12 +20,15 @@ class LocalSTTProvider(_STTProvider):
     def __init__(self) -> None:
         pass
 
-    def to_text(self, audio_data) -> str:
-        model = Model("resource/vosk_model")
+    def speech_to_text(self, audio_data, show_all=False) -> str:
+        model = Model("resources/vosk_model")
         rec = KaldiRecognizer(model, 16000)
         rec.SetWords(True)
         rec.AcceptWaveform(audio_data)
-        return rec.FinalResult()
+        if show_all == True:
+            return rec.FinalResult()
+        resp_json = json.loads(rec.FinalResult())
+        return resp_json["text"]
 
 
 class AzureSTTProvider(_STTProvider):
@@ -58,7 +62,7 @@ class AzureSTTProvider(_STTProvider):
 
         return access_token
 
-    def to_text(self, audio_data, language, format="simple", profanity="masked", model_cid=None, show_all=False):
+    def speech_to_text(self, audio_data, language, format="simple", profanity="masked", model_cid=None, show_all=False):
         wav_data = self._generate_wav(audio_data)
 
         headers = {

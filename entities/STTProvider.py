@@ -21,13 +21,15 @@ class LocalSTTProvider(_STTProvider):
         pass
 
     def speech_to_text(self, audio_data, show_all=False) -> str:
-        model = Model("resources/vosk_model")
+        # model = Model("resources/vosk_model")
+        model = Model("resources/vosk-model-small-cn-0.3")
         rec = KaldiRecognizer(model, 16000)
         rec.SetWords(True)
         rec.AcceptWaveform(audio_data)
         if show_all == True:
             return rec.FinalResult()
         resp_json = json.loads(rec.FinalResult())
+        print(resp_json)
         return resp_json["text"]
 
 

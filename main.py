@@ -13,6 +13,7 @@ def signal_handler(signal, frame):
 
 
 def interrupt_callback():
+    
     global interrupted
     return interrupted
 
@@ -23,17 +24,18 @@ if __name__ == '__main__':
 
     logger = utils.log.init_logging(name=__name__)
 
-    detector = snowboy.get_detector(config.hotword, sensitivity=0.65)
+    detector = snowboy.get_detector([config.hotword,config.hotword2], sensitivity=0.55)
 
     myLED = LED()
+    
 
     bot = Sory(detector=detector, led=myLED, config=config)
 
     logger.info("Sory Bot is listening.")
-    bot.detector.start(detected_callback=bot.detected_callback,
+    bot.detector.start(detected_callback=[bot.detected_callback,bot.dectected_stop],
                        audio_recorder_callback=bot.audio_recorder_callback,
                        interrupt_check=interrupt_callback,
-                       silent_count_threshold=12,
+                       silent_count_threshold=6,
                        sleep_time=0.01)
 
     bot.detector.terminate()

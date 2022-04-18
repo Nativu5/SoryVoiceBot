@@ -1,3 +1,4 @@
+from entities.switch import Switch
 import os
 from interface.azure import parse_wav_file, text_to_speech
 from interface.audio import VLCInterface
@@ -23,7 +24,7 @@ class Sory:
     def detected_callback(self):
         self.is_playing = self.VLC_instance.is_playing()
         if self.is_playing == True:
-            return False
+            return
         self.VLC_instance.play_audio("resources/wozai.wav")
         self.LED.power.on()
         for i in range(0, 12):
@@ -31,6 +32,12 @@ class Sory:
                 i, color={"r": 255, "g": 0, "b": 0}, bright=30)
         logger.info('Recording audio...')
         return True
+    
+    def dectected_stop(self):
+        if  self.is_playing == True:
+            self.VLC_instance.stop()
+            self.is_playing = False
+        return False
 
     def audio_recorder_callback(self, fname):
         if self.is_playing:
@@ -46,10 +53,11 @@ class Sory:
                 "Could not request results from STT service; {0}".format(e))
             reply = "语音转文字功能出错啦！"
         else:
-            parsed_str = stt_text.split("点歌")
+            func = Switch(stt_text)
 
             self.is_playing = False
-            if len(parsed_str) > 1:
+            if func[0] == 1:
+                parsed_str = stt_text.split(func[1])
                 logger.info("Trying to play: " + parsed_str[1])
                 song_list = self.music_provider.search_music(parsed_str[1])
                 if song_list != None and len(song_list) > 0:
@@ -58,7 +66,7 @@ class Sory:
                     self.VLC_instance.play_audio(song_url)
                     self.is_playing = True
 
-            if self.is_playing == False:
+            if self.is_playing == False&func[0] == 0:
                 reply = get_reply(stt_text)
                 logger.info("Bot: " + reply)
                 try:

@@ -1,5 +1,15 @@
 version: 0.1
 
-hotword: snowboy/resources/models/computer.umdl
+hotword: resources/snowboy_model/Sory.pmdl 
 
-log_level: DEBUG
+hotword2: resources/snowboy_model/stopp.pmdl
+
+log_level: INFO
+
+azure_key: d2f42a7713324813bde9d3bb3f8a342d
+
+netease_api_url: http://localhost:3000
+
+netease_email: sdtalyk@163.com
+
+netease_password_md5 : 8c97677e7cf25c075d5a0f8c907daaca

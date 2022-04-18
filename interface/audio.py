@@ -45,7 +45,8 @@ class VLCInterface:
         if self.player.is_playing() == 1:
             return True
         return False
-
+    def stop(self):
+        self.player.stop()
 
 if __name__ == "__main__":
     vlc_instance = VLCInterface()

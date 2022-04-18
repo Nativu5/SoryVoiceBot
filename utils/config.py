@@ -22,6 +22,7 @@ class Config:
         try:
             self.version = yaml_file["version"]
             self.hotword = yaml_file["hotword"]
+            self.hotword2 = yaml_file["hotword2"]
             self.azure_key = yaml_file["azure_key"]
             self.log_level = yaml_file["log_level"]
             self.netease_api_url = yaml_file["netease_api_url"]

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import numpy as np
 import collections
 import pyaudio
 from . import snowboydetect
@@ -162,7 +162,10 @@ class HotwordDetector(object):
         :return: None
         """
         self._running = True
-
+        self.CHANNELS = 1
+        self.RATE = 16000
+        self.CHUNKLEN = 512
+        self.chunks = int(self.RATE * 10 / self.CHUNKLEN)
         def audio_callback(in_data, frame_count, time_info, status):
             self.ring_buffer.extend(in_data)
             play_data = chr(0) * len(in_data)
@@ -237,6 +240,21 @@ class HotwordDetector(object):
 
             elif state == "ACTIVE":
                 stopRecording = False
+                CHUNKPERSEC = 32
+                TEST_AFTER_CHUNK = 4 * CHUNKPERSEC  # TEST_AFTER_SEC * CHUNKPERSEC
+                TEST_BETWEEN_CHUNK = 2 * CHUNKPERSEC  # TEST_BETWEEN_SEC * CHUNKPERSEC
+                energy = np.zeros(self.chunks)
+                energy_integral = np.zeros(self.chunks)
+                energy_integral[0] = energy[0]
+                THRESHOLD = 200
+                for i in range(0, self.chunks):  # max recording secs
+                    data_bytes = data                    
+                    data_int = np.fromstring(data_bytes, dtype=np.int16)  # array contain wav data
+                    energy[i] = np.sum(np.power(data_int / 10000, 2))  # to be modified
+                    energy_integral[i] = energy_integral[i - 1] + energy[i]  # i - 1 = -1 while i == 0
+                if i > TEST_AFTER_CHUNK:
+                    if np.subtract(energy_integral[i], energy_integral[i - TEST_BETWEEN_CHUNK]) < THRESHOLD :
+                        stopRecording = True         
                 if recordingCount > recording_timeout:
                     stopRecording = True
                 elif status == -2:  # silence found

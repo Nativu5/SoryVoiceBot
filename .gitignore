@@ -9,4 +9,4 @@ __pycache__/
 config.yaml
 .vscode
 *.log
-resources/*model
+resources/*model*

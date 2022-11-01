@@ -3,7 +3,6 @@ from utils.log import init_logging
 
 logger = init_logging(__name__)
 
-
 def get_reply(text: str):
     url = "http://api.qingyunke.com/api.php"
     params = {
@@ -26,7 +25,3 @@ def get_reply(text: str):
     reply = reply.replace("{br}", "\n")
 
     return reply
-
-
-if __name__ == "__main__":
-    print(get_reply("今天成都天气怎么样？"))

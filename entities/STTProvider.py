@@ -8,32 +8,30 @@ import json
 logger = init_logging(__name__)
 
 
-class _STTProvider:
-    def __init__(self):
-        pass
+def parse_wav_file(fname):
+    try:
+        with open(fname, "rb") as fo:
+            raw = fo.read()
+    except FileNotFoundError as e:
+        logger.error(f"Cannot open recorded wav file: {e}")
+        raise e
+    return raw
 
-    def speech_to_text(self):
-        return ""
 
+class LocalSTTProvider():
+    def __init__(self, model) -> None:
+        self.model = model
 
-class LocalSTTProvider(_STTProvider):
-    def __init__(self) -> None:
-        pass
-
-    def speech_to_text(self, audio_data, show_all=False) -> str:
-        # model = Model("resources/vosk_model")
-        model = Model("resources/vosk-model-small-cn-0.3")
+    def speech_to_text(self, audio_data) -> list[str]:
+        model = Model(self.model)
         rec = KaldiRecognizer(model, 16000)
         rec.SetWords(True)
         rec.AcceptWaveform(audio_data)
-        if show_all == True:
-            return rec.FinalResult()
         resp_json = json.loads(rec.FinalResult())
-        print(resp_json)
-        return resp_json["text"]
+        return resp_json['text'].split(' ')
 
 
-class AzureSTTProvider(_STTProvider):
+class AzureSTTProvider():
     def __init__(self, key, region) -> None:
         self.key = key
         self.region = region
@@ -48,25 +46,23 @@ class AzureSTTProvider(_STTProvider):
         return byte_buf
 
     def _get_token(self):
-        fetch_token_url = 'https://{}.api.cognitive.microsoft.com/sts/v1.0/issueToken'.format(
-            self.region)
+        fetch_token_url = f'https://{self.region}.api.cognitive.microsoft.com/sts/v1.0/issueToken'
         headers = {
             'Ocp-Apim-Subscription-Key': self.key
         }
 
         try:
-            response = requests.post(fetch_token_url, headers=headers)
+            response = requests.post(
+                fetch_token_url, headers=headers)  # type: ignore
             response.raise_for_status()
             access_token = str(response.text)
         except Exception as e:
-            logger.error("Cannot obtain access token from Azure: {}".format(e))
+            logger.error(f"Cannot obtain access token from Azure: {e}")
             raise e
 
         return access_token
 
-    def speech_to_text(self, audio_data, language, format="simple", profanity="masked", model_cid=None, show_all=False):
-        wav_data = self._generate_wav(audio_data)
-
+    def speech_to_text(self, audio_data, language="zh-CN", profanity="masked", model_cid=None) -> list[str]:
         headers = {
             "Content-type": "audio/wav; codecs=audio/pcm; samplerate=16000",
             "Accept": "application/json"
@@ -78,14 +74,13 @@ class AzureSTTProvider(_STTProvider):
             logger.warning("Change to use subscription_key directly.")
             headers["Ocp-Apim-Subscription-Key"] = self.key
         else:
-            headers["authorization"] = "Bearer {}".format(access_token)
+            headers["authorization"] = f"Bearer {access_token}"
 
-        recognize_url = 'https://{}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1'.format(
-            self.region)
+        recognize_url = f'https://{self.region}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1'
 
         params = {
             "language": language,
-            "format": format,
+            "format": "detailed",
             "profanity": profanity
         }
         if model_cid is not None:
@@ -93,17 +88,17 @@ class AzureSTTProvider(_STTProvider):
 
         try:
             response = requests.post(
-                recognize_url, headers=headers, params=params, data=wav_data)
+                recognize_url, headers=headers, params=params, data=audio_data)
             response.raise_for_status()
             response.encoding = response.apparent_encoding
+            
             r_json = response.json()
+            if r_json["RecognitionStatus"] != "Success":
+                raise Exception(f"Invalid STT output {r_json}")
+            
+            lexical_text = str(r_json["NBest"][0]["Lexical"])
         except Exception as e:
-            logger.error("Cannot obtain STT result: ".format(e))
+            logger.error(f"Cannot obtain STT result: {e}")
             raise e
 
-        try:
-            text = str(r_json["DisplayText"])
-        except:
-            raise Exception("Invalid STT output: ".format(r_json))
-
-        return r_json if show_all else text
+        return lexical_text.split(' ')

@@ -6,10 +6,10 @@ hotword2: resources/snowboy_model/stopp.pmdl
 
 log_level: INFO
 
-azure_key: d2f42a7713324813bde9d3bb3f8a342d
+azure_key: **REMOVED**
 
 netease_api_url: http://localhost:3000
 
-netease_email: sdtalyk@163.com
+netease_email: **REMOVED**
 
-netease_password_md5 : 8c97677e7cf25c075d5a0f8c907daaca
+netease_password_md5 : **REMOVED**

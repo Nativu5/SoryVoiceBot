@@ -6,7 +6,10 @@ __pycache__/
 # C extensions
 # *.so
 
+resources/*model*
+test.py
 config.yaml
 .vscode
 *.log
 resources/*model*
+*.wav

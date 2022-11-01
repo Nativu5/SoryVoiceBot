@@ -234,8 +234,8 @@ class HotwordDetector(object):
                         continue
 
                     if audio_recorder_callback is not None:
+                        time.sleep(4) # omit the "wozai.wav"
                         state = "ACTIVE"
-                        time.sleep(2) # omit the response
                     continue
 
             elif state == "ACTIVE":

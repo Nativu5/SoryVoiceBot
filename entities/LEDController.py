@@ -1,12 +1,13 @@
-from random import randint
 from time import sleep
-from . import apa102
+from interface import apa102
+from utils.log import init_logging
 from gpiozero import LED as GPIO
+import threading
 
 # LED 控制模块
+logger = init_logging(__name__)
 
-
-class LED:
+class LEDController:
     PIXELS_N = 12
 
     def __init__(self):
@@ -25,17 +26,18 @@ class LED:
         self.dev.show()
 
     def switch_by_place(self, place: int, color: dict, bright):
-        self.dev.set_pixel(place, color["r"], color["g"], color["b"], 50)
+        self.dev.set_pixel(place, color["r"], color["g"], color["b"], bright)
         self.dev.show()
-        # self.switch(pattern={place: [color["r"], color["g"], color["b"], bright]})
 
-
-if __name__ == "__main__":
-    MyLED = LED()
-    MyLED.power.on()
-    for i in range(0, 12):
-        MyLED.switch_by_place(
-            i, {'r': randint(0, 255), 'g': randint(0, 255), 'b': randint(0, 255)}, 31)
-        sleep(1)
-        # MyLED.switch({i: [255, 255, 0, 0]})
-    MyLED.power.off()
+    def _rotate_lights(self, count, time=0.25):
+        while count > 0:
+            self.dev.rotate()
+            self.dev.show()
+            sleep(time)
+            count -= 1
+        self.dev.clear_strip()
+    
+    def circulate_lights(self, color, bright):
+        self.dev.set_pixel(0, color["r"], color["g"], color["b"], bright)
+        th_rotate_lights = threading.Thread(target=self._rotate_lights, args=(24, 0.1))
+        th_rotate_lights.start()

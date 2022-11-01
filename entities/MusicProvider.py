@@ -114,7 +114,6 @@ class CloudMusicProvider(_MusicProvider):
             'Cookie': self.cookie
         }
 
-
         try:
             resp = requests.get(url, headers=headers)
             resp.raise_for_status()
@@ -149,7 +148,7 @@ class CloudMusicProvider(_MusicProvider):
 
         songlist = []
         try:
-            resp = requests.get(url, headers=headers, params=params)
+            resp = requests.get(url, headers=headers, params=params) 
             resp.raise_for_status()
             resp_json = resp.json()
             assert isinstance(resp_json["result"]["songs"], list)

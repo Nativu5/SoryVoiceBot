@@ -69,16 +69,16 @@ class Sory:
                 parsed_str = "".join(stt_words[idx+1:])
                 logger.info(f"Trying to play: {parsed_str}")
 
-                song_list = self.music.search_music(parsed_str)
-                if song_list != None and len(song_list) > 0:
-                    song_url = self.music.get_song_url(song_list[0])
-                    logger.info("Streaming {}...".format(song_url))
-
-                    self.player.play_audio(song_url)
-                    self.is_playing = True
-                else:
+                try:
+                    song_list = self.music.search_music(parsed_str)
+                    song_url = self.music.get_song_url(song_list[0]["id"])
+                except:
                     # 无歌可放
                     play_back = "resources/noSong.wav"
+                else:
+                    logger.info(f"Streaming {song_list[0]['name']} from {song_list[0]['artists']}{song_url}...")
+                    self.player.play_audio(song_url)
+                    self.is_playing = True
 
             elif func == 2:
                 # 家具

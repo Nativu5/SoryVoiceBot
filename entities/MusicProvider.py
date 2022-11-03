@@ -124,7 +124,7 @@ class CloudMusicProvider(_MusicProvider):
             f.write(self.cookie)
         
     def _check_if_login(self) -> bool:
-        url = self.base_url + "/login/status"
+        url = self.base_url + "/user/account"
     
         headers = {
             'Cookie': self.cookie
@@ -134,13 +134,14 @@ class CloudMusicProvider(_MusicProvider):
             resp = requests.get(url, headers=headers)
             resp.raise_for_status()
             resp_json = resp.json()
-            login_status = resp_json["data"]["account"]["status"]
+            logger.debug(resp_json)
+            login_status = resp_json["account"]["status"]
         except Exception as e:
             logger.error("Fail to check login status: {}".format(e))
             self.is_login = False
             return False
         else:
-            if login_status == "0":
+            if login_status == 0:
                 self.is_login = True
                 return True
             else:
@@ -151,7 +152,8 @@ class CloudMusicProvider(_MusicProvider):
 
     def search_music(self, keyword, limit=1):
         if self.is_login == False:
-            return None
+            logger.error("Not logged in.")
+            raise Exception("Not logged in.")
 
         url = self.base_url + "/cloudsearch"
 
@@ -169,13 +171,12 @@ class CloudMusicProvider(_MusicProvider):
             resp = requests.get(url, headers=headers, params=params) 
             resp.raise_for_status()
             resp_json = resp.json()
-            assert isinstance(resp_json["result"]["songs"], list)
             for song in resp_json["result"]["songs"]:
-                songlist.append(song["id"])
-            assert isinstance(songlist, list)
+                songlist.append(
+                    {"id": song["id"], "name": song["name"], "artists": [ar["name"] for ar in song["ar"]]})
         except Exception as e:
-            logger.error("Fail to search: {}".format(e))
-            return None
+            logger.error(f"Fail to search: {e}")
+            raise e
 
         return songlist
 

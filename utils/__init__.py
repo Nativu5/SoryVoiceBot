@@ -2,7 +2,20 @@ import logging
 import yaml
 import os
 
-log_level = "INFO"
+def get_config_by_name(filepath, name):
+    if os.path.exists(filepath) == False:
+        logger.critical("No config file found!")
+        exit(-1)
+    with open(filepath, "r") as f:
+        yaml_file = yaml.safe_load(f)
+    try:
+        ret = yaml_file[name]
+    except AttributeError:
+        logger.critical("No such configuration.")
+        exit(-1)
+    return ret
+
+log_level = get_config_by_name('config.yaml', "log_level")
 logger = logging.Logger(__name__, log_level)
 
 class Config:
@@ -29,21 +42,6 @@ class Config:
         except AttributeError:
             logger.critical("Corrupt config file!")
             exit()
-        global log_level
-        log_level = self.log_level
-
-def get_config_by_name(filepath, name):
-    if os.path.exists(filepath) == False:
-        logger.critical("No config file found!")
-        exit(-1)
-    with open(filepath, "r") as f:
-        yaml_file = yaml.safe_load(f)
-    try:
-        ret = yaml_file[name]
-    except AttributeError:
-        logger.critical("No such configuration.")
-        exit(-1)
-    return ret
 
 def init_logging(name: str):
     logger = logging.getLogger(name)

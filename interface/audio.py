@@ -2,7 +2,7 @@ import vlc
 import pyaudio
 import wave
 import time
-from utils.log import init_logging
+from utils import init_logging
 
 logger = init_logging(__name__)
 

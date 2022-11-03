@@ -1,6 +1,6 @@
 from xml.etree import ElementTree
+from utils import init_logging
 import requests
-from utils.log import init_logging
 
 logger = init_logging(__name__)
 
@@ -59,7 +59,6 @@ class AzureTTSProvider():
 
         with open(fname, 'wb') as audio:
             audio.write(response.content)
-
 
 class LocalTTSProvider():
     def __init__(self):

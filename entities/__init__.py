@@ -1,11 +1,9 @@
-from interface.audio import VLCInterface
+from utils import init_logging
 from interface.qingyunke import get_reply
 from entities.STTProvider import parse_wav_file
-from utils.log import init_logging
-from entities.MusicProvider import CloudMusicProvider, LocalMusicProvider
-from entities.STTProvider import LocalSTTProvider
-logger = init_logging(__name__)
+from entities.LEDController import RED, BLUE, GREEN
 
+logger = init_logging(__name__)
 
 def choose_function(word_list):
     key_func_map = {'点歌' : 1, '播放': 1, '音乐': 1, "歌曲": 1, "放歌": 1, "家具": 2}
@@ -18,37 +16,36 @@ def choose_function(word_list):
     return (0, 0)
 
 class Sory:
-    def __init__(self, config, detector, music, stt, tts, led) -> None:
+    def __init__(self, config, detector, music, stt, tts, led, player) -> None:
         self.detector = detector
         self.config = config
         self.music = music
         self.stt = stt
         self.tts = tts
-        self.LED = led
-        self.VLC_instance = VLCInterface()
-
+        self.led = led
+        self.player = player
         self.is_playing = False
 
-    def detected_callback(self):
-        self.is_playing = self.VLC_instance.is_playing()
+    def detected_callback(self) -> bool:
+        self.is_playing = self.player.is_playing()
         if self.is_playing == True:
             logger.info('Bot is playing sounds, omitting detection...')
             return False
 
-        self.VLC_instance.play_audio("resources/wozai.wav")
-        for i in range(0, 12):
-            self.LED.switch_by_place(
-                i, color={"r": 255, "g": 0, "b": 0}, bright=15)
+        self.player.play_audio("resources/wozai.wav")
+        self.led.set_all_lights(RED, 30)
         logger.info('Recording audio...')
         return True
 
-    def dectected_stop(self):
+    def dectected_stop(self) -> bool:
         if self.is_playing == True:
-            self.VLC_instance.stop()
+            self.player.stop()
             self.is_playing = False
         return False
 
     def audio_recorder_callback(self, fname):
+        stop_breathing = self.led.breathing_lights(color=RED)
+        
         # 默认回复
         play_back = "resources/error.wav"
 
@@ -77,7 +74,7 @@ class Sory:
                     song_url = self.music.get_song_url(song_list[0])
                     logger.info("Streaming {}...".format(song_url))
 
-                    self.VLC_instance.play_audio(song_url)
+                    self.player.play_audio(song_url)
                     self.is_playing = True
                 else:
                     # 无歌可放
@@ -103,7 +100,7 @@ class Sory:
 
         finally:
             if self.is_playing != True:
-                self.VLC_instance.play_audio(play_back)
+                self.player.play_audio(play_back)
                 self.is_playing = True
 
-        self.LED.dev.clear_strip()
+        stop_breathing()

@@ -1,7 +1,7 @@
 import wave
 from io import BytesIO
 import requests
-from utils.log import init_logging
+from utils import init_logging
 from vosk import Model, KaldiRecognizer
 import json
 
@@ -23,7 +23,7 @@ class LocalSTTProvider():
         self.model = model
 
     def speech_to_text(self, audio_data) -> list[str]:
-        model = Model(self.model)
+        model = Model(model_path=self.model)
         rec = KaldiRecognizer(model, 16000)
         rec.SetWords(True)
         rec.AcceptWaveform(audio_data)

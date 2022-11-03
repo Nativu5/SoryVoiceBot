@@ -9,14 +9,12 @@ import os
 from ctypes import CFUNCTYPE, c_char_p, c_int, cdll
 from contextlib import contextmanager
 
-from utils.log import init_logging
+from utils import init_logging
 
 logger = init_logging(__name__)
 
 TOP_DIR = os.path.dirname(os.path.abspath(__file__))
 RESOURCE_FILE = os.path.join(TOP_DIR, "common.res")
-DETECT_DING = os.path.join(TOP_DIR, "resources/ding.wav")
-DETECT_DONG = os.path.join(TOP_DIR, "resources/dong.wav")
 
 
 def py_error_handler(filename, line, function, err, fmt):
@@ -56,29 +54,6 @@ class RingBuffer(object):
         tmp = bytes(bytearray(self._buf))
         self._buf.clear()
         return tmp
-
-
-def play_audio_file(fname=DETECT_DING):
-    """Simple callback function to play a wave file. By default it plays
-    a Ding sound.
-
-    :param str fname: wave file name
-    :return: None
-    """
-    ding_wav = wave.open(fname, 'rb')
-    ding_data = ding_wav.readframes(ding_wav.getnframes())
-    with no_alsa_error():
-        audio = pyaudio.PyAudio()
-    stream_out = audio.open(
-        format=audio.get_format_from_width(ding_wav.getsampwidth()),
-        channels=ding_wav.getnchannels(),
-        rate=ding_wav.getframerate(), input=False, output=True)
-    stream_out.start_stream()
-    stream_out.write(ding_data)
-    time.sleep(0.2)
-    stream_out.stop_stream()
-    stream_out.close()
-    audio.terminate()
 
 
 class HotwordDetector(object):
@@ -129,7 +104,7 @@ class HotwordDetector(object):
         self.ring_buffer = RingBuffer(
             self.detector.NumChannels() * self.detector.SampleRate() * 5)
 
-    def start(self, detected_callback=play_audio_file,
+    def start(self, detected_callback,
               interrupt_check=lambda: False,
               sleep_time=0.03,
               audio_recorder_callback=None,
@@ -234,7 +209,7 @@ class HotwordDetector(object):
                         continue
 
                     if audio_recorder_callback is not None:
-                        time.sleep(4) # omit the "wozai.wav"
+                        time.sleep(3.5) # omit the "wozai.wav"
                         state = "ACTIVE"
                     continue
 

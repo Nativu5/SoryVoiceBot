@@ -1,7 +1,7 @@
 import os
 import requests
 import difflib
-from utils.log import init_logging
+from utils import init_logging
 
 logger = init_logging(__name__)
 
@@ -34,16 +34,19 @@ class CloudMusicProvider(_MusicProvider):
         self.cookie = None
         self.uid = None
 
+        if self._load_cached_cookies() and self._check_if_login():
+            logger.info("Already logged in.")
+            return
+
         if phone != None:
             self._login_by_phone(phone, password, md5_password)
         elif email != None:
             self._login_by_email(email, password, md5_password)
         else:
-            logger.warning("Insuffient infomation to login in.")
-
-        # nickname = self._get_nickname()
-        # if self.is_login == True and nickname != None:
-        #     logger.info(nickname + " have logged in CloudMusic.")
+            logger.warning("Insuffient infomation to log in.")
+            return
+    
+        self._save_cookies()
 
     def _login_by_phone(self, phone, password=None, md5_password=None):
         url = self.base_url + "/login/cellphone"
@@ -106,10 +109,23 @@ class CloudMusicProvider(_MusicProvider):
         self.cookie = cookie
         self.uid = uid
         return True
+    
+    def _load_cached_cookies(self) -> bool:
+        if os.path.exists("netease_cookies") != True:
+            return False
+        with open("netease_cookies", "r") as f:
+            self.cookie = f.read()
+        return True
 
-    def _get_nickname(self):
-        url = self.base_url + "/user/account"
-
+    def _save_cookies(self):
+        if self.cookie == None:
+            return
+        with open("netease_cookies", "w") as f:
+            f.write(self.cookie)
+        
+    def _check_if_login(self) -> bool:
+        url = self.base_url + "/login/status"
+    
         headers = {
             'Cookie': self.cookie
         }
@@ -118,15 +134,17 @@ class CloudMusicProvider(_MusicProvider):
             resp = requests.get(url, headers=headers)
             resp.raise_for_status()
             resp_json = resp.json()
-            nickname = resp_json["profile"]["nickname"]
+            login_status = resp_json["data"]["account"]["status"]
         except Exception as e:
             logger.error("Fail to check login status: {}".format(e))
             self.is_login = False
-            nickname = None
+            return False
         else:
-            self.is_login = True
-
-        return nickname
+            if login_status == "0":
+                self.is_login = True
+                return True
+            else:
+                return False
 
     def get_music_list(self):
         pass
@@ -212,5 +230,3 @@ class LocalMusicProvider(_MusicProvider):
 
     def get_song_uri(self, song_id):
         return song_id
-
-    

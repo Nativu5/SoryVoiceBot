@@ -1,0 +1,32 @@
+version: 0.1
+
+hotword: resources/snowboy_model/YOUR_MODEL.pmdl
+
+hotword2: resources/snowboy_model/YOUR_MODEL_2.pmdl
+
+sensitivity: 0.5
+
+log_level: INFO
+
+azure_key: YOUR_AZURE_KEY_HERE
+
+azure_region: japaneast
+
+netease_api_url: http://localhost:3000
+
+netease_email: YOUR_EMAIL_HERE
+
+netease_password_md5: YOUR_PASSWORD_MD5_HERE
+
+hass:
+  url: http://localhost:8123
+  devices:
+    台灯:
+      切换: YOUR_WEBHOOKS_TOKEN_HERE
+      开灯: YOUR_WEBHOOKS_TOKEN_HERE
+      打开: YOUR_WEBHOOKS_TOKEN_HERE
+      关灯: YOUR_WEBHOOKS_TOKEN_HERE
+      关掉: YOUR_WEBHOOKS_TOKEN_HERE
+      熄灭: YOUR_WEBHOOKS_TOKEN_HERE
+      变暗: YOUR_WEBHOOKS_TOKEN_HERE
+      变亮: YOUR_WEBHOOKS_TOKEN_HERE

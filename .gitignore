@@ -7,9 +7,10 @@ __pycache__/
 # *.so
 
 resources/*model*
+resources/.backup
 test/
 config.yaml
 .vscode
 *.log
-resources/*model*
 *.wav
+netease_cookies

@@ -39,6 +39,7 @@ class Config:
             self.netease_api_url = yaml_file["netease_api_url"]
             self.netease_email = yaml_file["netease_email"]
             self.netease_password_md5 = yaml_file["netease_password_md5"]
+            self.hass_config = yaml_file["hass"]
         except AttributeError:
             logger.critical("Corrupt config file!")
             exit()

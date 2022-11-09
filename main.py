@@ -1,7 +1,7 @@
+from interface.hainterface import HAInterface
 import utils
 from snowboy import get_detector
 from signal import signal, SIGTERM, SIGINT
-from time import sleep
 from entities import Sory
 from entities.LEDController import LEDController, RED
 from entities.MusicProvider import CloudMusicProvider, LocalMusicProvider
@@ -46,7 +46,7 @@ if __name__ == '__main__':
         color=RED, bright=15, lapse=0.1)
 
     detector = get_detector(
-        [config.hotword, config.hotword2], sensitivity=config.sensitivity)
+        config.hotword, sensitivity=config.sensitivity)
 
     music_provider = CloudMusicProvider(
         base_url=config.netease_api_url, email=config.netease_email, md5_password=config.netease_password_md5)
@@ -55,12 +55,14 @@ if __name__ == '__main__':
     tts_provider = AzureTTSProvider(
         key=config.azure_key, region=config.azure_region)
 
+    hass_interface = HAInterface(config.hass_config)
+
     bot = Sory(config=config, detector=detector, led=led_control,
-               music=music_provider, stt=stt_provider, tts=tts_provider, player=audio_player)
+               music=music_provider, stt=stt_provider, tts=tts_provider, hass=hass_interface, player=audio_player)
 
     logger.info("Sory Bot is listening.")
     stop_circulate()
-    bot.detector.start(detected_callback=[bot.detected_callback, bot.dectected_stop],
+    bot.detector.start(detected_callback=bot.detected_callback,
                        audio_recorder_callback=bot.audio_recorder_callback,
                        interrupt_check=interrupt_callback,
                        silent_count_threshold=6,
